@@ -1,3 +1,4 @@
+#Paweł Puźniak, Niestaconarne Rok II - L2 (MITI) - UP Kraków 2019
 # Wykorzystując pętle, break i else proszę napisać program, w którym użytkownik w przeciągu skończonej liczby prób ma
 # odgadnąć ustawione wcześniej słowo. W przypadku, kiedy mu się uda program ma wypisać gratulacje, a jeśli skończy
 # się liczba prób to poinformować o przegranej.
