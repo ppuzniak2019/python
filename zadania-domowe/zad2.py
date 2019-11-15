@@ -11,16 +11,17 @@ haslo = "python"
 
 odliczanie = 0
 podliczenie = int(liczbaProb)
-while odliczanie < int(liczbaProb):
+odpowiedz = 0
+while odliczanie < int(liczbaProb) and odpowiedz != haslo:
     odpowiedz = input("Zgadnij hasło!")
     odliczanie += 1
+    podliczenie -= 1
     if odpowiedz.lower() == haslo:
         print("Gratulacje! Odgadłeś!")
         break
-    else:
-        podliczenie -=1
-        print("To nie to hasło, próbuj ponownie! Zostały Ci " + str(podliczenie) + " podejścia!")
-print("Ups, skończyły się podejścia - spróbuj innym razem!")
+    print("To nie to hasło, próbuj ponownie! Zostały Ci " + str(podliczenie) + " podejścia!")
+else:
+    print("Ups, skończyły się podejścia - spróbuj innym razem!")
 koniec = input()
 if koniec == True:
     sys.exit()
