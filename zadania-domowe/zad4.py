@@ -6,5 +6,5 @@ lista=['Damian', 'Ola', 'Barbara', 'Robert', 'Zygmunt', 'Ewa']
 
 list_len = len(lista)
 
-lista2 = [str(lista[element][:1]) for element in range(list_len)]
+lista2 = [lista[element][:1] for element in range(list_len)]
 print(lista2)
