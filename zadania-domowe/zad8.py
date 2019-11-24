@@ -1,0 +1,1 @@
+#Za pomocą with open( ) proszę odczytać zawartość jednego pliku i zapisać w drugim. Proszę uwzględnić obsługę wyjątków.
