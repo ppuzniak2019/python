@@ -1,58 +1,81 @@
 """
+ +-+-+-+-+-+ +-+-+-+-+-+-+-+
+ |P|a|w|e|ł| |P|u|ź|n|i|a|k|
+ +-+-+-+-+-+ +-+-+-+-+-+-+-+
+
 PROGRAM DO WYSYŁANIA I ODBIERANIA MAILI
-PAWEŁ PUŹNIAK 2019
 UNIWERSYTET PEDAGOGICZNY IM. KEN W KRAKOWIE
 PROJEKT ZALICZENIOWY JĘZYKI SKRYPTOWE
 
 """
 import smtplib
 import sys
-import email
-import imaplib
-
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
-#FUNKCJA ZAKOŃCZENIA PROGRAMU
+import easyimap
+
+
+# Aby zainstalować "easyimap":
+# 1. Wejdź w ustawienia - Crtl + Alt + S (PyCharm)
+# 3. Następnie wybrać Project -> Project Interpreter -> kliknąć '+'
+# 4. Wyszukać: easyimap-python i zainstalować
+
+# FUNKCJA ZAKOŃCZENIA PROGRAMU
 def koniecProgramu():
     print("Kliknij enter aby zakończyć działanie programu.")
-    koniec = input()
-    if koniec == True:
-        sys.exit()
+    poczekanie = input()
+    sys.exit()
 
-#FUNKCJA WYBORU, WYBIERA JEDNĄ Z KILKU FUNKCJI
+
+# FUNKCJA PAUZOWANIA PROGRAMU
+def pauzaProgramu():
+    print("\n---------- (kliknij enter aby kontynuować) ----------")
+    poczekanie = input()
+
+
+# FUNKCJA WYBORU, WYBIERA JEDNĄ Z KILKU FUNKCJI
 def wyborFunkcji(programStatus):
     if programStatus == 1:
-        print("\n\tDostępne funkcje:\n\t1) Wyślij mail\n\t2) Odbierz mail\n\t3) Konfiguracja\n\t"
+        print("\n\tDostępne funkcje:\n\t1) Wyślij mail\n\t"
+              "2) Odbierz mail\n\t3) Konfiguracja\n\t"
               "0) Zakończ program")
 
         funkcja = int(input())
         if funkcja == 1:
-            print("Wybrałeś opcje wysyłki maila, postępuj zgodnie z poleceniami:\n")
+            print("Wybrałeś opcje wysyłki maila, "
+                  "postępuj zgodnie z poleceniami:\n")
             wyslijWiadomosc()
-            print("\n\nWybierz co robimy dalej:")
+            pauzaProgramu()
+            print("\nWybierz co robimy dalej:")
             wyborFunkcji(1)
         elif funkcja == 2:
-            print("Wybrałeś opcje odbioru maila, poniżej lista wiadomości na koncie: " + login + "\n")
+            print("Wybrałeś opcje odbioru maila, poniżej "
+                  "zobaczysz listę wiadomości w skrzynce: " + login + "\n")
             odbierzMail()
-            print("\n\nWybierz co robimy dalej:")
+            pauzaProgramu()
+            print("\nWybierz co robimy dalej:")
             wyborFunkcji(1)
         elif funkcja == 3:
-            print("Wybrałeś opcje zmiany konfigarcji, uzupełnij wymagane dane:\n")
+            print("Wybrałeś opcje zmiany konfigarcji, "
+                  "uzupełnij wymagane dane:\n")
             zmienKonfiguracje()
-            print("\n\nWybierz co robimy dalej:")
+            pauzaProgramu()
+            print("\nWybierz co robimy dalej:")
             wyborFunkcji(1)
         elif funkcja == 0:
             print("Wybrałeś opcję zakończenia programu!")
             koniecProgramu()
         else:
-            print("Zły numer, wybierz ponownie bądź kliknij 0 aby wyjść z programu.")
+            print("Zły numer, wybierz ponownie bądź kliknij "
+                  "0 aby wyjść z programu.")
             wyborFunkcji(1)
 
     else:
         koniecProgramu()
 
-#FUNKCJA WYSYŁKI MAILA
+
+# FUNKCJA WYSYŁKI MAILA
 def wyslijWiadomosc():
     nadawca = login
     temat = input("Podaj temat wiadomości: ")
@@ -73,39 +96,30 @@ def wyslijWiadomosc():
 
     print("Wiadomość wysłana poprawnie!")
 
-#FUNKCJA ODBIERANIA MAILA
+
+# FUNKCJA ODBIERANIA MAILA
 def odbierzMail():
-    mail = imaplib.IMAP4_SSL(serwer)
-    mail.login(login, haslo)
-    mail.select('inbox')
-
-    status, data = mail.search(None, 'ALL')
-    mail_ids = []
-    for block in data:
-        mail_ids += block.split()
-    for i in mail_ids:
-        status, data = mail.fetch(i, '(RFC822)')
-        for response_part in data:
-            if isinstance(response_part, tuple):
-                message = email.message_from_bytes(response_part[1])
-                mail_from = message['from']
-                mail_subject = message['subject']
-                if message.is_multipart():
-                    mail_content = ''
-                    for part in message.get_payload():
-                        if part.get_content_type() == 'text/plain':
-                            mail_content += part.get_payload()
-                else:
-                    mail_content = message.get_payload()
-                print('\tOd: ' + mail_from)
-                print('\tTemat: ' + mail_subject)
-                print('\tTreść: ' + mail_content + '\n')
+    ileMaili = input("Podaj ilość maili jaką "
+                     "chcesz przeczytać: ")
+    skrzynka = "inbox"
+    imapper = easyimap.connect(serwer, login, haslo, skrzynka,
+                               ssl=False, port=143)
+    for mail_id in imapper.listids(limit=int(ileMaili)):
+        mail = imapper.mail(mail_id)
+        print("----------\nWiadomośc email:\n----------")
+        print("Od: " + mail.from_addr)
+        print("Do: " + mail.to)
+        print("Temat: " + mail.title)
+        print("Treść:\n" + mail.body)
+    imapper.quit()
 
 
-#ZMIANA KONFIGURACJI SERWERA I KONTA
+# ZMIANA KONFIGURACJI SERWERA I KONTA
 def zmienKonfiguracje():
     global login, haslo, serwer, port
-    print("Czy chcesz zmienić konfigurację, czy skorzystać z przykładowego konta? (1 - moje konto, 2 - przykładowe)")
+    print("Czy chcesz zmienić konfigurację, czy "
+          "skorzystać z przykładowego konta?"
+          "(1 - moje konto, 2 - przykładowe)")
     konf = input("Wpisz 1 lub 2: ")
     if konf == str(1):
         login = input("Podaj swój login: ")
@@ -122,14 +136,16 @@ def zmienKonfiguracje():
         koniecProgramu()
     print("Konfiguracja zakończona!")
 
+
 def main():
     programStatus = 1
-    print("Program nie jest skonfigurowany! Wypełnij wymagane dane:\n")
+    print("\n--- Program nie jest skonfigurowany! "
+          "Wypełnij wymagane dane! ---\n")
     zmienKonfiguracje()
-    print("\nWitaj w programie do wysyłania i odbierania maili!\nAby przejść dalej wybierz odpowiednią opcję:")
+    print("\nWitaj w programie do wysyłania i odbierania maili!\n"
+          "Aby przejść dalej wybierz odpowiednią opcję:")
     wyborFunkcji(programStatus)
 
-if __name__== "__main__":
+
+if __name__ == "__main__":
     main()
-
-
